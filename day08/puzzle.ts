@@ -7,12 +7,38 @@ const input = async (filename = "input.txt"): Promise<string> => {
 
 export const solutionOne = async (): Promise<number> => {
     const lines = await input();
-    return process(lines.split('\n'), "part1");
+    let rows = lines.split('\n').map((line, i) => mapToInArrayWithId(line, i));
+    for(let i = 0; i < rows.length; i++){
+        let leftToRight = rows[i];
+        visibleTrees(leftToRight);
+        visibleTrees(leftToRight.reverse())
+    }
+    let columns = rotate(rows);
+    for(let i = 0; i < columns.length; i++){
+        let upToDown = columns[i];
+        visibleTrees(upToDown);
+        visibleTrees(upToDown.reverse());
+    }
+    return columns.flat().map(t => t.visible ? 1 : 0).reduce((x, y) => x + y);
 };
 
 export const solutionTwo = async (): Promise<number> => {
     const lines = await input();
-    return process(lines.split('\n'), 'part2');
+    let rows = lines.split('\n').map((line, i) => mapToInArrayWithId(line, i));
+    rows.forEach((row, i) =>
+        row.forEach((tree, j) => {
+            viewFromTreeHouse(row.slice(0, j).reverse(), tree);
+            viewFromTreeHouse(row.slice(j + 1, row.length), tree);
+        })
+    );
+    let columns = rotate(rows);
+    columns.forEach((column, i) =>
+        column.forEach((tree, j) => {
+            viewFromTreeHouse(column.slice(0, j).reverse(), tree);
+            viewFromTreeHouse(column.slice(j + 1, column.length), tree);
+        })
+    );
+    return columns.flat().map(t => t.view).reduce((x, y) => x < y ? y : x, 0);
 }
 
 class TreeVisibility{
@@ -52,38 +78,4 @@ let rotate = (matrix: TreeVisibility[][]):TreeVisibility[][] => {
 
 let mapToInArrayWithId = (line: string, row: number):TreeVisibility[] => {
     return line.split('').map((tree, index ) => new TreeVisibility(`[${row},${index}]`, parseInt(tree)) )
-}
-
-let process = (input: string[], part: string) : number => {
-    if(part == 'part1'){
-        let rows = input.map((line, i) => mapToInArrayWithId(line, i));
-        for(let i = 0; i < rows.length; i++){
-            let leftToRight = rows[i];
-            visibleTrees(leftToRight);
-            visibleTrees(leftToRight.reverse())
-        }
-        let columns = rotate(rows);
-        for(let i = 0; i < columns.length; i++){
-            let upToDown = columns[i];
-            visibleTrees(upToDown);
-            visibleTrees(upToDown.reverse());
-        }
-        return columns.flat().map(t => t.visible ? 1 : 0).reduce((x, y) => x + y);
-    }else{
-        let rows = input.map((line, i) => mapToInArrayWithId(line, i));
-        rows.forEach((row, i) =>
-            row.forEach((tree, j) => {
-                viewFromTreeHouse(row.slice(0, j).reverse(), tree);
-                viewFromTreeHouse(row.slice(j + 1, row.length), tree);
-            })
-        );
-        let columns = rotate(rows);
-        columns.forEach((column, i) =>
-            column.forEach((tree, j) => {
-                viewFromTreeHouse(column.slice(0, j).reverse(), tree);
-                viewFromTreeHouse(column.slice(j + 1, column.length), tree);
-            })
-        );
-        return columns.flat().map(t => t.view).reduce((x, y) => x < y ? y : x, 0);
-    }
 }
