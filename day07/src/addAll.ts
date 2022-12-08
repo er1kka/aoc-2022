@@ -75,6 +75,9 @@ let process = (input: string[], part: string) : number => {
         let toBeFreed = 30000000 - free;
         let dirSizes: number[] = [];
         walkTree(root, dirSizes);
+
+
+
         return <number>dirSizes.sort((n1,n2) => n1 - n2).find(count => count > toBeFreed);
     }
 }
